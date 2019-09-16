@@ -7,11 +7,18 @@ Created on Sun Sep 15 14:10:05 2019
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-data = pd.read_csv("https://assets.datacamp.com/production/repositories/1765/datasets/ae888d00f9b36dd7d50a4afbc112761e2db766d2/turnover.csv")
+data_all = pd.read_csv("https://assets.datacamp.com/production/repositories/1765/datasets/ae888d00f9b36dd7d50a4afbc112761e2db766d2/turnover.csv")
 
-department = pd.get_dummies(data.department)
+department = pd.get_dummies(data_all.department)
 department = department.drop("technical",axis=1)
-data.drop("department",axis=1)
+data = data_all.drop("department",axis=1)
+
+# Change the type of the "salary" column to categorical
+data.salary = data.salary.astype('category')
+#Provide the correct order of categories
+data.salary = data.salary.cat.reorder_categories(['low', 'medium', 'high'])
+#Encode observations as codes, not labels
+data.salary = data.salary.cat.codes
 
 corr_matrix= data.corr()
 
@@ -23,7 +30,7 @@ from sklearn.model_selection import train_test_split
 #Then using scikit learn package I can separate traning and test datasets
 target_train, target_test, features_train, features_test = train_test_split(target,features,test_size=0.25,random_state=42)
 
-
+from sklearn.tree import DecisionTreeClassifier
 # Apply Decision Tree model to fit Features to the Target
 model = DecisionTreeClassifier(random_state=42)
 model_depth_5 = DecisionTreeClassifier(max_depth=5, random_state=42)
@@ -87,6 +94,10 @@ param_search.fit(features_train, target_train)
 # print the best parameters found
 print(param_search.best_params_)
 
+max_depth=param_search.best_params_['max_depth']
+min_sample=param_search.best_params_['min_samples_leaf']
+model_best = DecisionTreeClassifier(max_depth=max_depth,min_samples_leaf=min_sample,random_state=42)
+model_best.fit(features_train, target_train)
 
  
 # Calculate feature importances
@@ -113,4 +124,9 @@ selected_list = selected_features.index
 features_train_selected = features_train[selected_list]
 features_test_selected = features_test[selected_list]
 
+#last model
+model_best.fit(features_train_selected,target_train)
+export_graphviz(model_best,"tree.dot")
 
+
+d
