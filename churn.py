@@ -128,5 +128,7 @@ features_test_selected = features_test[selected_list]
 model_best.fit(features_train_selected,target_train)
 export_graphviz(model_best,"tree.dot")
 
+model_best.feature_importances_
 
-d
+
+sum(data_all[(data_all.satisfaction<=0.115) & (data_all.evaluation<=2.5)].churn)
